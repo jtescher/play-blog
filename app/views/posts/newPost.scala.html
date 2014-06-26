@@ -1,0 +1,12 @@
+@(postForm: Form[Post])
+
+@main("New Post") {
+    @helper.form(action = routes.Posts.create) {
+        @helper.inputText(postForm("title"))
+        @helper.textarea(postForm("body"))
+
+        <div class="form-actions">
+            <button type="submit">Create Post</button>
+        </div>
+    }
+}

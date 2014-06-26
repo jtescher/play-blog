@@ -21,4 +21,12 @@ object Post {
     allQuery.toList
   }
 
+  def create(post: Post): Post = inTransaction {
+    postsTable.insert(post)
+  }
+
+  def find(id: Long): Post = inTransaction {
+    postsTable.where(post => post.id === id).single
+  }
+
 }

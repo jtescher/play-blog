@@ -1,0 +1,8 @@
+@(post: Post)
+
+@main(post.title) {
+    <h1>Title: @post.title</h1>
+    <p>Body: @post.body</p>
+}
+
+<a href="@routes.Posts.index">Back</a>
