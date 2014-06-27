@@ -8,6 +8,8 @@
                 <th>Id</th>
                 <th>Name</th>
                 <th>Body</th>
+                <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -16,6 +18,11 @@
                     <td>@post.id</td>
                     <td>@post.title</td>
                     <td>@post.body</td>
+                    <td><a href="@routes.Posts.show(post.id)">show</a></td>
+                    <td><a href="@routes.Posts.destroy(post.id)"
+                           data-method="delete"
+                           rel="nofollow"
+                           data-confirm="Are you sure?">Destroy</a></td>
                 </tr>
             }
         </tbody>

@@ -10,6 +10,7 @@ GET     /posts                      controllers.Posts.index
 POST    /posts                      controllers.Posts.create
 GET     /posts/new                  controllers.Posts.newPost
 GET     /posts/:id                  controllers.Posts.show(id: Long)
+DELETE  /posts/:id                  controllers.Posts.destroy(id: Long)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

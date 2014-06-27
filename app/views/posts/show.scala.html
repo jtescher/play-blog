@@ -1,6 +1,17 @@
-@(post: Post)
+@(post: Post)(implicit flash: Flash)
 
 @main(post.title) {
+    @if(flash.get("success").isDefined) {
+        <div class="alert alert-success">
+            @flash.get("success")
+        </div>
+    }
+
+    @if(flash.get("error").isDefined) {
+        <div class="alert alert-error">
+            @flash.get("error")
+        </div>
+    }
     <h1>Title: @post.title</h1>
     <p>Body: @post.body</p>
 }

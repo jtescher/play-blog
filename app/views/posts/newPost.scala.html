@@ -1,6 +1,19 @@
-@(postForm: Form[Post])
+@(postForm: Form[Post])(implicit flash: Flash)
 
 @main("New Post") {
+    @if(flash.get("success").isDefined) {
+        <div class="alert alert-success">
+            @flash.get("success")
+        </div>
+    }
+
+    @if(flash.get("error").isDefined) {
+        <div class="alert alert-error">
+            @flash.get("error")
+        </div>
+    }
+
+    <h1>New post</h1>
     @helper.form(action = routes.Posts.create) {
         @helper.inputText(postForm("title"))
         @helper.textarea(postForm("body"))
@@ -9,4 +22,5 @@
             <button type="submit">Create Post</button>
         </div>
     }
+    <a href="@routes.Posts.index()">Back</a>
 }

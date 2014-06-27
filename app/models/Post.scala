@@ -29,4 +29,8 @@ object Post {
     postsTable.where(post => post.id === id).single
   }
 
+  def destroy(id: Long) = inTransaction {
+     postsTable.deleteWhere(post => post.id === id)
+  }
+
 }
