@@ -1,0 +1,28 @@
+@(post: Post, postForm: Form[Post])(implicit flash: Flash)
+
+@main("Edit " + post.title) {
+    @if(flash.get("success").isDefined) {
+        <div class="alert alert-success">
+            @flash.get("success")
+        </div>
+    }
+
+    @if(flash.get("error").isDefined) {
+        <div class="alert alert-error">
+            @flash.get("error")
+        </div>
+    }
+
+    <h1>Edit post</h1>
+    @helper.form(action = routes.Posts.update(post.id)) {
+        <input name="_method" type="hidden" value="patch" />
+        @helper.inputText(postForm("title"))
+        @helper.textarea(postForm("body"))
+
+        <div class="form-actions">
+            <button type="submit">Update Post</button>
+        </div>
+    }
+    <a href="@routes.Posts.index()">Posts</a>
+    <a href="@routes.Posts.show(post.id)">Show</a>
+}

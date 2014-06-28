@@ -4,14 +4,12 @@ import org.squeryl.KeyedEntity
 
 case class Post (id: Long, title: String, body: String) extends KeyedEntity[Long]
 
-
 import org.squeryl.PrimitiveTypeMode._
-import org.squeryl.Table
 import org.squeryl.Query
 import collection.Iterable
 
 object Post {
-  import Database.{postsTable}
+  import Database.postsTable
 
   def allQuery: Query[Post] = from(postsTable) {
     post => select(post)
@@ -27,6 +25,10 @@ object Post {
 
   def find(id: Long): Post = inTransaction {
     postsTable.where(post => post.id === id).single
+  }
+
+  def update(post: Post) = inTransaction {
+    postsTable.update(post)
   }
 
   def destroy(id: Long) = inTransaction {

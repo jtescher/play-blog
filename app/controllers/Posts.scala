@@ -21,7 +21,7 @@ object Posts extends Controller {
   )(Post.apply)(Post.unapply))
 
   def newPost = Action { implicit request =>
-  Ok(views.html.posts.newPost(postForm))
+    Ok(views.html.posts.newPost(postForm))
   }
 
   def create = Action { implicit request =>
@@ -42,6 +42,24 @@ object Posts extends Controller {
   def destroy(id: Long) = Action {
     Post.destroy(id)
     Redirect(routes.Posts.index()).flashing("success" -> "Post was successfully destroyed.")
+  }
+
+  def edit(id: Long) = Action { implicit request =>
+    val post = Post.find(id)
+    val filledPostForm = postForm.fill(post)
+    Ok(views.html.posts.edit(post, filledPostForm))
+  }
+
+  def update(id: Long) = Action { implicit request =>
+    postForm.bindFromRequest.fold(
+      formWithErrors => Ok(views.html.posts.edit(Post.find(id), formWithErrors)),
+      post => {
+        val postWithId = post.copy(id = id)
+        Post.update(postWithId)
+        Redirect(routes.Posts.show(postWithId.id)).flashing("success" -> "Post was successfully update.")
+      }
+    )
+
   }
 
 }
