@@ -1,11 +1,10 @@
 package controllers
 
-import play.api._
 import play.api.mvc._
 import play.api.data.Form
 import play.api.data.Forms._
 
-import models.Post
+import models.{Post, Comment}
 
 object Posts extends Controller {
 
@@ -19,6 +18,12 @@ object Posts extends Controller {
     "title" -> nonEmptyText,
     "body" -> nonEmptyText
   )(Post.apply)(Post.unapply))
+
+  val commentForm = Form(mapping(
+    "id" -> ignored(-1L),
+    "body" -> nonEmptyText,
+    "post_id" -> longNumber
+  )(Comment.apply)(Comment.unapply))
 
   def newPost = Action { implicit request =>
     Ok(views.html.posts.newPost(postForm))
@@ -36,7 +41,8 @@ object Posts extends Controller {
 
   def show(id: Long) = Action { implicit request =>
     val post = Post.find(id)
-    Ok(views.html.posts.show(post))
+    val comments = Comment.allByPostId(post.id)
+    Ok(views.html.posts.show(post, comments, commentForm))
   }
 
   def destroy(id: Long) = Action {
