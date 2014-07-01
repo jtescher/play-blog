@@ -19,12 +19,28 @@ object Post {
     allQuery.toList
   }
 
+  def firstQuery: Query[Post] = from(postsTable) {
+    post => select(post).orderBy(post.id asc)
+  }
+
+  def first: Option[Post] = inTransaction {
+    try {
+      Some(firstQuery.single)
+    } catch {
+      case _ : RuntimeException => None
+    }
+  }
+
   def create(post: Post): Post = inTransaction {
     postsTable.insert(post)
   }
 
-  def find(id: Long): Post = inTransaction {
-    postsTable.where(post => post.id === id).single
+  def find(id: Long): Option[Post] = inTransaction {
+    try {
+      Some(postsTable.where(post => post.id === id).single)
+    } catch {
+      case _ : RuntimeException => None
+    }
   }
 
   def update(post: Post) = inTransaction {

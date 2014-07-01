@@ -40,9 +40,13 @@ object Posts extends Controller {
   }
 
   def show(id: Long) = Action { implicit request =>
-    val post = Post.find(id)
-    val comments = Comment.allByPostId(post.id)
-    Ok(views.html.posts.show(post, comments, commentForm))
+    Post.find(id) match {
+      case Some(post) => {
+        val comments = Comment.allByPostId(post.id)
+        Ok(views.html.posts.show(post, comments, commentForm))
+      }
+      case None => NotFound
+    }
   }
 
   def destroy(id: Long) = Action {
@@ -51,21 +55,29 @@ object Posts extends Controller {
   }
 
   def edit(id: Long) = Action { implicit request =>
-    val post = Post.find(id)
-    val filledPostForm = postForm.fill(post)
-    Ok(views.html.posts.edit(post, filledPostForm))
+    Post.find(id) match {
+      case Some(post) => {
+        val filledPostForm = postForm.fill(post)
+        Ok(views.html.posts.edit(post, filledPostForm))
+      }
+      case None => NotFound
+    }
   }
 
   def update(id: Long) = Action { implicit request =>
-    postForm.bindFromRequest.fold(
-      formWithErrors => Ok(views.html.posts.edit(Post.find(id), formWithErrors)),
-      post => {
-        val postWithId = post.copy(id = id)
-        Post.update(postWithId)
-        Redirect(routes.Posts.show(postWithId.id)).flashing("success" -> "Post was successfully update.")
+    Post.find(id) match {
+      case Some(post) => {
+        postForm.bindFromRequest.fold(
+          formWithErrors => Ok(views.html.posts.edit(post, formWithErrors)),
+          validPost => {
+            val validPostWithId = validPost.copy(id = id)
+            Post.update(validPostWithId)
+            Redirect(routes.Posts.show(validPostWithId.id)).flashing("success" -> "Post was successfully update.")
+          }
+        )
       }
-    )
-
+      case None => NotFound
+    }
   }
 
 }
