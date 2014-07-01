@@ -26,6 +26,15 @@ class PostsSpec extends Specification {
       contentAsString(index) must contain (post.body)
     }
 
+    "render the index page as JSON" in new WithApplication{
+      val post = Post.create(new Post(1, "Cool title", "Cool body"))
+      val index = route(FakeRequest(GET, "/posts").withHeaders("Accept" -> "application/json")).get
+
+      status(index) must equalTo(OK)
+      contentType(index) must beSome.which(_ == "application/json")
+      contentAsString(index) must contain (post.body)
+    }
+
     "render the new page" in new WithApplication{
       val newPost = route(FakeRequest(GET, "/posts/new")).get
 
@@ -44,6 +53,16 @@ class PostsSpec extends Specification {
       Post.first must beSome.which(post => post.body == body)
     }
 
+    "create new post as JSON" in new WithApplication{
+      val title = "Cool Title"
+      val body = "Cool Body"
+      val Some(create) = route(FakeRequest(POST, "/posts").withHeaders("Accept" -> "application/json")
+                                                          .withFormUrlEncodedBody("title" -> title, "body" -> body))
+
+      status(create) must equalTo(OK)
+      contentAsString(create) must contain (body)
+    }
+
     "show errors creating invalid posts" in new WithApplication{
       val Some(create) = route(FakeRequest(POST, "/posts").withFormUrlEncodedBody("title" -> "Valid Title", "body" -> ""))
 
@@ -55,12 +74,22 @@ class PostsSpec extends Specification {
     "render the show page" in new WithApplication{
       val post = Post.create(new Post(1, "Cool title", "Cool body"))
       val comment = Comment.create(new Comment(1, "Cool comment body", 1))
-      val index = route(FakeRequest(GET, "/posts/1")).get
+      val show = route(FakeRequest(GET, "/posts/1")).get
 
-      status(index) must equalTo(OK)
-      contentType(index) must beSome.which(_ == "text/html")
-      contentAsString(index) must contain (post.body)
-      contentAsString(index) must contain (comment.body)
+      status(show) must equalTo(OK)
+      contentType(show) must beSome.which(_ == "text/html")
+      contentAsString(show) must contain (post.body)
+      contentAsString(show) must contain (comment.body)
+    }
+
+    "render the show page as JSON" in new WithApplication{
+      val post = Post.create(new Post(1, "Cool title", "Cool body"))
+      val comment = Comment.create(new Comment(1, "Cool comment body", 1))
+      val show = route(FakeRequest(GET, "/posts/1").withHeaders("Accept" -> "application/json")).get
+
+      status(show) must equalTo(OK)
+      contentType(show) must beSome.which(_ == "application/json")
+      contentAsString(show) must contain (post.body)
     }
 
     "render the edit page" in new WithApplication{
@@ -82,6 +111,16 @@ class PostsSpec extends Specification {
       Post.first must beSome.which(post => post.body == changedBody)
     }
 
+    "update existing posts as JSON" in new WithApplication{
+      val post = Post.create(new Post(1, "Cool title", "Cool body"))
+      val changedBody = "Changed body text"
+      val Some(edit) = route(FakeRequest(PUT, "/posts/1").withHeaders("Accept" -> "application/json")
+                                                         .withFormUrlEncodedBody("title" -> post.title, "body" -> changedBody))
+
+      status(edit) must equalTo(OK)
+      Post.first must beSome.which(post => post.body == changedBody)
+    }
+
     "show errors updating invalid posts" in new WithApplication{
       val post = Post.create(new Post(1, "Cool title", "Cool body"))
       val changedBody = ""
@@ -98,6 +137,14 @@ class PostsSpec extends Specification {
 
       status(delete) must equalTo(SEE_OTHER)
       redirectLocation(delete) must beSome.which(_ == "/posts")
+      Post.first must beNone
+    }
+
+    "delete existing posts as JOSN" in new WithApplication{
+      val post = Post.create(new Post(1, "Cool title", "Cool body"))
+      val Some(delete) = route(FakeRequest(DELETE, "/posts/1").withHeaders("Accept" -> "application/json"))
+
+      status(delete) must equalTo(OK)
       Post.first must beNone
     }
 
