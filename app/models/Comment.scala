@@ -20,6 +20,18 @@ object Comment {
     allByIdQuery(postId).toList
   }
 
+  def firstQuery: Query[Comment] = from(commentsTable) {
+    comment => select(comment).orderBy(comment.id asc)
+  }
+
+  def first: Option[Comment] = inTransaction {
+    try {
+      Some(firstQuery.single)
+    } catch {
+      case _ : RuntimeException => None
+    }
+  }
+
   def create(comment: Comment): Comment = inTransaction {
     commentsTable.insert(comment)
   }

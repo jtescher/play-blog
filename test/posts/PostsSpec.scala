@@ -5,7 +5,7 @@ import org.junit.runner._
 import play.api.test._
 import play.api.test.Helpers._
 
-import models.Post
+import models.{Post, Comment}
 
 /**
  * Add your spec here.
@@ -34,7 +34,7 @@ class PostsSpec extends Specification {
       contentAsString(newPost) must contain ("New Post")
     }
 
-    "creates new posts" in new WithApplication{
+    "create new posts" in new WithApplication{
       val title = "Cool Title"
       val body = "Cool Body"
       val Some(create) = route(FakeRequest(POST, "/posts").withFormUrlEncodedBody("title" -> title, "body" -> body))
@@ -44,13 +44,23 @@ class PostsSpec extends Specification {
       Post.first must beSome.which(post => post.body == body)
     }
 
+    "show errors creating invalid posts" in new WithApplication{
+      val Some(create) = route(FakeRequest(POST, "/posts").withFormUrlEncodedBody("title" -> "Valid Title", "body" -> ""))
+
+      status(create) must equalTo(OK)
+      contentType(create) must beSome.which(_ == "text/html")
+      contentAsString(create) must contain ("This field is required")
+    }
+
     "render the show page" in new WithApplication{
       val post = Post.create(new Post(1, "Cool title", "Cool body"))
+      val comment = Comment.create(new Comment(1, "Cool comment body", 1))
       val index = route(FakeRequest(GET, "/posts/1")).get
 
       status(index) must equalTo(OK)
       contentType(index) must beSome.which(_ == "text/html")
       contentAsString(index) must contain (post.body)
+      contentAsString(index) must contain (comment.body)
     }
 
     "render the edit page" in new WithApplication{
@@ -62,7 +72,7 @@ class PostsSpec extends Specification {
       contentAsString(edit) must contain (post.body)
     }
 
-    "updates existing posts" in new WithApplication{
+    "update existing posts" in new WithApplication{
       val post = Post.create(new Post(1, "Cool title", "Cool body"))
       val changedBody = "Changed body text"
       val Some(edit) = route(FakeRequest(PUT, "/posts/1").withFormUrlEncodedBody("title" -> post.title, "body" -> changedBody))
@@ -72,7 +82,17 @@ class PostsSpec extends Specification {
       Post.first must beSome.which(post => post.body == changedBody)
     }
 
-    "deletes existing posts" in new WithApplication{
+    "show errors updating invalid posts" in new WithApplication{
+      val post = Post.create(new Post(1, "Cool title", "Cool body"))
+      val changedBody = ""
+      val Some(edit) = route(FakeRequest(PUT, "/posts/1").withFormUrlEncodedBody("title" -> post.title, "body" -> changedBody))
+
+      status(edit) must equalTo(OK)
+      contentType(edit) must beSome.which(_ == "text/html")
+      contentAsString(edit) must contain ("This field is required")
+    }
+
+    "delete existing posts" in new WithApplication{
       val post = Post.create(new Post(1, "Cool title", "Cool body"))
       val Some(delete) = route(FakeRequest(DELETE, "/posts/1"))
 
