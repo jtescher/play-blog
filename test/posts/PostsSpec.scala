@@ -1,3 +1,4 @@
+import org.specs2.matcher.JsonMatchers
 import org.specs2.mutable._
 import org.specs2.runner._
 import org.junit.runner._
@@ -13,7 +14,7 @@ import models.{Post, Comment}
  * For more information, consult the wiki.
  */
 @RunWith(classOf[JUnitRunner])
-class PostsSpec extends Specification {
+class PostsSpec extends Specification with JsonMatchers {
 
   "Posts" should {
 
@@ -60,7 +61,9 @@ class PostsSpec extends Specification {
                                                           .withFormUrlEncodedBody("title" -> title, "body" -> body))
 
       status(create) must equalTo(OK)
-      contentAsString(create) must contain (body)
+      val json: String = contentAsString(create)
+      json must /("title" -> title)
+      json must /("body" -> body)
     }
 
     "show errors creating invalid posts" in new WithApplication{
@@ -140,7 +143,7 @@ class PostsSpec extends Specification {
       Post.first must beNone
     }
 
-    "delete existing posts as JOSN" in new WithApplication{
+    "delete existing posts as JSON" in new WithApplication{
       val post = Post.create(new Post(1, "Cool title", "Cool body"))
       val Some(delete) = route(FakeRequest(DELETE, "/posts/1").withHeaders("Accept" -> "application/json"))
 
